@@ -2,14 +2,12 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 import { spawn } from "child_process";
 
-interface ScrapCourse {
-  id: string;
-  title: string;
-  image: string;
-  url: string;
+interface UserEnrolledCourses {
+  userId: number;
+  courseId: number;
 }
 
-const courseFetching = async (studentId: string) => {
+const userEnrolledCourses = async (studentId: string) => {
   const user = await prisma.user.findUnique({
     where: {
       studentId: studentId,
@@ -29,30 +27,44 @@ const courseFetching = async (studentId: string) => {
 
     const data = await scrapData;
     const courses = JSON.parse(String(data).replace(/'/g, '"'));
-    const allCourses = await prisma.course.findMany();
-
-    const filteredCourses: ScrapCourse[] = [];
-    courses.forEach((course: ScrapCourse) => {
-      const filter = allCourses.filter((c) => c.courseId === course.id);
-      if (filter.length == 0) {
-        filteredCourses.push(course);
-      }
+    const courseList = courses.map((course: any) => {
+      return course.id;
     });
 
-    const formatted = filteredCourses.map((course: ScrapCourse) => {
+    const userCourses = await prisma.course.findMany({
+      where: {
+        courseId: {
+          in: courseList,
+        },
+      },
+    });
+
+    const formatted = userCourses.map((course: any) => {
       return {
         courseId: course.id,
-        name: course.title,
-        image: course.image,
-        url: course.url,
+        userId: user.id,
       };
     });
 
-    try {
-      const response = await prisma.course.createMany({
-        data: formatted,
-      });
+    const allUserEnrolledCourses = await prisma.userEnrolledCourses.findMany({
+      where: {
+        userId: user.id,
+      },
+    });
+    const filteredUserEnrolled: UserEnrolledCourses[] = [];
+    formatted.forEach((course: UserEnrolledCourses) => {
+      const filter = allUserEnrolledCourses.filter(
+        (c) => c.courseId === course.courseId && c.userId === course.userId
+      );
+      if (filter.length == 0) {
+        filteredUserEnrolled.push(course);
+      }
+    });
 
+    try {
+      const response = await prisma.userEnrolledCourses.createMany({
+        data: filteredUserEnrolled,
+      });
       return {
         code: 200,
         data: {
@@ -79,5 +91,4 @@ const courseFetching = async (studentId: string) => {
     };
   }
 };
-
-export default courseFetching;
+export default userEnrolledCourses;

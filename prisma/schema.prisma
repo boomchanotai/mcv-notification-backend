@@ -11,23 +11,54 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  studentId String   @unique
-  name      String
-  password  String?
-  cookie    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  Courses   Course[]
+  id                  Int                   @id @default(autoincrement())
+  studentId           String                @unique
+  name                String
+  password            String?
+  cookie              String
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  UserEnrolledCourses UserEnrolledCourses[]
 }
 
 model Course {
-  id               Int      @id @default(autoincrement())
-  courseId         String   @unique
-  name             String
-  image            String
-  url              String
-  enrolledStudents User[]
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  id                  Int                   @id @default(autoincrement())
+  courseId            String                @unique
+  name                String
+  image               String
+  url                 String
+  assignments         Assignment[]          @relation("CourseAssignment")
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  UserEnrolledCourses UserEnrolledCourses[]
+}
+
+model Assignment {
+  id        Int              @id @default(autoincrement())
+  name      String
+  image     String
+  url       String
+  postDate  DateTime
+  dueDate   DateTime
+  status    AssignmentStatus @default(TODO)
+  course    Course           @relation("CourseAssignment", fields: [courseId], references: [id])
+  courseId  Int
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+}
+
+model UserEnrolledCourses {
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  course    Course   @relation(fields: [courseId], references: [id])
+  courseId  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([userId, courseId])
+}
+
+enum AssignmentStatus {
+  TODO
+  DONE
 }

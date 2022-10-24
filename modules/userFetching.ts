@@ -38,6 +38,7 @@ const userFetching = async (username: string, password: string) => {
             cookie: data.cookie,
           },
         });
+
         return {
           code: 200,
           data: {
@@ -48,7 +49,7 @@ const userFetching = async (username: string, password: string) => {
       } catch (error) {
         return {
           code: 403,
-          data: { status: "error", message: error },
+          data: { status: "error", message: "user creation error" },
         };
       }
     } else {
