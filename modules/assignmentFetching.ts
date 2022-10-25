@@ -2,6 +2,11 @@ import { AssignmentStatus, PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 import { spawn } from "child_process";
 
+interface User {
+  id: number;
+  cookie: string;
+}
+
 interface Course {
   id: number;
   code: string;
@@ -14,7 +19,7 @@ interface Assignment {
   url: string;
   postDate: Date;
   dueDate: Date;
-  status: AssignmentStatus;
+  // status: AssignmentStatus;
   courseId: number;
 }
 
@@ -22,10 +27,10 @@ function getMonthFromString(mon: string) {
   return new Date(Date.parse(mon + " 1, 2012")).getMonth() + 1;
 }
 
-const assignmentFetching = async (cookie: string, course: Course) => {
+const assignmentFetching = async (user: User, course: Course) => {
   const python = spawn("python3", [
     "scripts/get-assignments.py",
-    cookie,
+    user.cookie,
     course.code,
   ]);
   const scrapData = new Promise((resolve, reject) => {
@@ -69,10 +74,57 @@ const assignmentFetching = async (cookie: string, course: Course) => {
     }
   });
 
-  const response = await prisma.assignment.createMany({
-    data: filteredAssignments,
+  await prisma.assignment.createMany({
+    data: filteredAssignments.map((assignment) => {
+      return {
+        name: assignment.name,
+        image: assignment.image,
+        url: assignment.url,
+        postDate: assignment.postDate,
+        dueDate: assignment.dueDate,
+        courseId: assignment.courseId,
+      };
+    }),
   });
-  return response;
+
+  const allAssignmentStatus = await prisma.userAssignmentStatus.findMany();
+  const pushedAssignments = await prisma.assignment.findMany();
+  const filteredAssignmentStatus: any[] = [];
+  pushedAssignments.forEach((assignment: Assignment) => {
+    const status = formattedAssignments.find(
+      (a: Assignment) => a.url === assignment.url
+    );
+    if (status) filteredAssignmentStatus.push(status);
+  });
+
+  // Check if the assignment status is already in the database
+  const assignmentStatusNotInDb: any[] = [];
+  filteredAssignmentStatus.forEach((assignment: any) => {
+    const assignmentId = pushedAssignments.find(
+      (a) => a.url === assignment.url
+    )?.id;
+    const filter = allAssignmentStatus.filter(
+      (c) => c.assignmentId === assignmentId && c.userId === user.id
+    );
+    if (filter.length == 0) {
+      assignmentStatusNotInDb.push({
+        assignmentId,
+        ...assignment,
+      });
+    }
+  });
+
+  // Push the assignment status to the database
+  const statusResponse = await prisma.userAssignmentStatus.createMany({
+    data: assignmentStatusNotInDb.map((assignment: any) => {
+      return {
+        userId: 1,
+        assignmentId: assignment.assignmentId,
+        status: assignment.status,
+      };
+    }),
+  });
+  return statusResponse;
 };
 
 export default assignmentFetching;

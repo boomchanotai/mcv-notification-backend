@@ -11,14 +11,15 @@ datasource db {
 }
 
 model User {
-  id                  Int                   @id @default(autoincrement())
-  studentId           String                @unique
-  name                String
-  password            String?
-  cookie              String
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-  UserEnrolledCourses UserEnrolledCourses[]
+  id                   Int                    @id @default(autoincrement())
+  studentId            String                 @unique
+  name                 String
+  password             String?
+  cookie               String
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  UserEnrolledCourses  UserEnrolledCourses[]  @relation("UserEnrolledCourse")
+  UserAssignmentStatus UserAssignmentStatus[]
 }
 
 model Course {
@@ -30,27 +31,39 @@ model Course {
   assignments         Assignment[]          @relation("CourseAssignment")
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
-  UserEnrolledCourses UserEnrolledCourses[]
+  UserEnrolledCourses UserEnrolledCourses[] @relation("CourseEnrolledByUser")
 }
 
 model Assignment {
-  id        Int              @id @default(autoincrement())
-  name      String
-  image     String
-  url       String
-  postDate  DateTime
-  dueDate   DateTime
-  status    AssignmentStatus @default(TODO)
-  course    Course           @relation("CourseAssignment", fields: [courseId], references: [id])
-  courseId  Int
-  createdAt DateTime         @default(now())
-  updatedAt DateTime         @updatedAt
+  id                   Int                    @id @default(autoincrement())
+  name                 String
+  image                String
+  url                  String
+  postDate             DateTime
+  dueDate              DateTime
+  course               Course                 @relation("CourseAssignment", fields: [courseId], references: [id])
+  courseId             Int
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  UserAssignmentStatus UserAssignmentStatus[]
+}
+
+model UserAssignmentStatus {
+  user         User             @relation(fields: [userId], references: [id])
+  userId       Int
+  assignment   Assignment       @relation(fields: [assignmentId], references: [id])
+  assignmentId Int
+  status       AssignmentStatus @default(TODO)
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@id([userId, assignmentId])
 }
 
 model UserEnrolledCourses {
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation("UserEnrolledCourse", fields: [userId], references: [id])
   userId    Int
-  course    Course   @relation(fields: [courseId], references: [id])
+  course    Course   @relation("CourseEnrolledByUser", fields: [courseId], references: [id])
   courseId  Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

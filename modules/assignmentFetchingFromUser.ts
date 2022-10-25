@@ -24,10 +24,16 @@ const assignmentFetchingFromUser = async (studentId: string) => {
         "https://www.mycourseville.com/?q=courseville/course/",
         ""
       );
-      await assignmentFetching(user.cookie, {
-        id: course.courseId,
-        code: courseCode,
-      });
+      await assignmentFetching(
+        {
+          id: user.id,
+          cookie: user.cookie,
+        },
+        {
+          id: course.courseId,
+          code: courseCode,
+        }
+      );
     }
 
     return {

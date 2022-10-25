@@ -62,9 +62,26 @@ router.get(
   }
 );
 
+router.get(
+  "/assignment-status",
+  async (req: express.Request, res: express.Response) => {
+    const assignmentStatus = await prisma.userAssignmentStatus.findMany({});
+    res.json(assignmentStatus);
+  }
+);
+
 router.get("/test", async (req: express.Request, res: express.Response) => {
-  const test = await await prisma.assignment.findMany({});
-  res.json(test.length);
+  const assignmentFetch = await assignmentFetching(
+    {
+      id: 1,
+      cookie: "SESSeb912a58562fbbdf6ad5e9a19524d1c0=g6irglint3v96782av9pc1glf0",
+    },
+    {
+      id: 1,
+      code: "29480",
+    }
+  );
+  res.json(assignmentFetch);
 });
 
 module.exports = router;
