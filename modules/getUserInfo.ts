@@ -44,6 +44,8 @@ const getUserInfo = async (studentId: string) => {
               url: assignment.url,
               postDate: assignment.postDate,
               dueDate: assignment.dueDate,
+              createdAt: assignment.createdAt,
+              updatedAt: assignment.updatedAt,
               status: user.UserAssignmentStatus.find(
                 (status) => status.assignmentId === assignment.id
               )?.status,
