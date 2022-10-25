@@ -1,12 +1,22 @@
 import axios from "axios";
 
-const sendNewAssignmentNotification = async (data: any) => {
+const sendNewAssignmentNotification = async (
+  userId: string,
+  data: any,
+  type: string
+) => {
   const courses = data.enrolledCourses;
-  let message = "‼️ New Assignment Announcement";
+  let message =
+    type === "NEW"
+      ? "‼️ New Assignment Announcement"
+      : "📝 Assignment Reminder";
   for (const course of courses) {
     let text = "\n";
     if (course.assignments.length > 0) {
-      text += `\n📚 ${course.name} has ${course.assignments.length} new assignments\n`;
+      text +=
+        type === "NEW"
+          ? `\n📚 ${course.name} has ${course.assignments.length} new assignments\n`
+          : `\n📚 ${course.name} has ${course.assignments.length} assignments wait for you\n`;
       for (const assignment of course.assignments) {
         text += assignment.name + "\n";
         text +=
@@ -27,7 +37,7 @@ const sendNewAssignmentNotification = async (data: any) => {
   await axios.post(
     "https://api.line.me/v2/bot/message/push",
     {
-      to: "U2a999525267a69c041507361b6200ee9",
+      to: userId,
       messages: [
         {
           type: "text",

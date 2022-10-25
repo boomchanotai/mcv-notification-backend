@@ -16,7 +16,7 @@ model User {
   name                 String
   password             String?
   cookie               String
-  lineUserId           String
+  lineUserId           String                 @unique
   createdAt            DateTime               @default(now())
   updatedAt            DateTime               @updatedAt
   UserEnrolledCourses  UserEnrolledCourses[]  @relation("UserEnrolledCourse")
