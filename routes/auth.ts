@@ -5,15 +5,17 @@ import express from "express";
 import courseFetching from "../modules/courseFetching";
 import assignmentFetchingFromUser from "../modules/assignmentFetchingFromUser";
 import userEnrolledCourses from "../modules/userEnrolledCourses";
-import assignmentFetching from "../modules/assignmentFetching";
+import axios from "axios";
 const router = express.Router();
+require("dotenv").config();
 
 /* GET home page. */
 router.post("/login", async (req: express.Request, res: express.Response) => {
   const username = req.body.username;
   const password = req.body.password;
+  const line = req.body.line;
 
-  const userFetch = await userFetching(username, password);
+  const userFetch = await userFetching(username, password, line);
   const courseFetch = await courseFetching(username);
   const userEnrolledRelation = await userEnrolledCourses(username);
   const assignmentFetch = await assignmentFetchingFromUser(username);
@@ -70,18 +72,28 @@ router.get(
   }
 );
 
-router.get("/test", async (req: express.Request, res: express.Response) => {
-  const assignmentFetch = await assignmentFetching(
+router.post("/test", async (req: express.Request, res: express.Response) => {
+  await axios.post(
+    "https://api.line.me/v2/bot/message/push",
     {
-      id: 1,
-      cookie: "SESSeb912a58562fbbdf6ad5e9a19524d1c0=g6irglint3v96782av9pc1glf0",
+      to: "something",
+      messages: [
+        {
+          type: "text",
+          text: "hii",
+        },
+      ],
     },
     {
-      id: 1,
-      code: "29480",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + process.env.LINE_CHANNEL_ACCESS_SECRET,
+      },
     }
   );
-  res.json(assignmentFetch);
+  res.json({
+    status: "success",
+  });
 });
 
 module.exports = router;

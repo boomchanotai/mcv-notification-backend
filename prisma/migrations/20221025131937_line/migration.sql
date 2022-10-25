@@ -8,6 +8,7 @@ CREATE TABLE "User" (
     "name" TEXT NOT NULL,
     "password" TEXT,
     "cookie" TEXT NOT NULL,
+    "lineUserId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -44,14 +45,13 @@ CREATE TABLE "Assignment" (
 
 -- CreateTable
 CREATE TABLE "UserAssignmentStatus" (
-    "id" SERIAL NOT NULL,
     "userId" INTEGER NOT NULL,
     "assignmentId" INTEGER NOT NULL,
     "status" "AssignmentStatus" NOT NULL DEFAULT 'TODO',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "UserAssignmentStatus_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "UserAssignmentStatus_pkey" PRIMARY KEY ("userId","assignmentId")
 );
 
 -- CreateTable

@@ -7,7 +7,7 @@ interface User {
   cookie: string;
 }
 
-const userFetching = async (username: string, password: string) => {
+const userFetching = async (username: string, password: string, line: any) => {
   const checkExistUser = await prisma.user.findMany({
     where: {
       studentId: username,
@@ -36,6 +36,7 @@ const userFetching = async (username: string, password: string) => {
             studentId: username,
             name: data.name,
             cookie: data.cookie,
+            lineUserId: line.userId,
           },
         });
 
