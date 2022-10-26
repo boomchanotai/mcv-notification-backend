@@ -7,6 +7,11 @@ const router = express.Router();
 import getUserInfo from "../modules/getUserInfo";
 import isToday from "../utils/checkIsToday";
 import sendNewAssignmentNotification from "../modules/sendNewAssignmentNotification";
+import courseFetching from "../modules/courseFetching";
+import userEnrolledCourses from "../modules/userEnrolledCourses";
+import assignmentFetchingFromUser from "../modules/assignmentFetchingFromUser";
+import sendSmallLineMessage from "../modules/sendSmallLineMessage";
+import sendAssignmentReminder from "../modules/cronjobs/sendAssignmentReminder";
 
 router.get(
   "/:studentId",
@@ -75,6 +80,9 @@ router.get(
       },
     });
     if (user) {
+      await courseFetching(studentId);
+      await userEnrolledCourses(studentId);
+      await assignmentFetchingFromUser(studentId);
       const data = await getUserInfo(studentId);
       if (data) {
         const response = {
@@ -110,5 +118,12 @@ router.get(
     }
   }
 );
+
+router.get("/:studentId/assignmentdue", async (req, res) => {
+  await sendAssignmentReminder();
+  res.status(200).json({
+    data: "success",
+  });
+});
 
 module.exports = router;
