@@ -25,6 +25,7 @@ router.post("/login", async (req: express.Request, res: express.Response) => {
     userEnrolledRelation.code === 200 &&
     assignmentFetch.code === 200
   ) {
+    console.log("User logged in !");
     res.status(200).json(userFetch.data);
   }
 });
@@ -71,29 +72,5 @@ router.get(
     res.json(assignmentStatus);
   }
 );
-
-router.post("/test", async (req: express.Request, res: express.Response) => {
-  await axios.post(
-    "https://api.line.me/v2/bot/message/push",
-    {
-      to: "something",
-      messages: [
-        {
-          type: "text",
-          text: "hii",
-        },
-      ],
-    },
-    {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + process.env.LINE_CHANNEL_ACCESS_SECRET,
-      },
-    }
-  );
-  res.json({
-    status: "success",
-  });
-});
 
 module.exports = router;

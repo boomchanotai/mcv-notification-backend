@@ -17,7 +17,15 @@ router.get(
   "/:studentId",
   async (req: express.Request, res: express.Response) => {
     const studentId = req.params.studentId;
+    const user = await prisma.user.findUnique({
+      where: {
+        studentId: studentId,
+      },
+    });
     const data = await getUserInfo(studentId);
+    if (user) {
+      await sendNewAssignmentNotification(user.lineUserId, data, "ALL");
+    }
     res.status(200).json({
       data,
     });

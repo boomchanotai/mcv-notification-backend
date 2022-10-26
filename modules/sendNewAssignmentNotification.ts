@@ -9,18 +9,22 @@ const sendNewAssignmentNotification = async (
   let message =
     type === "NEW"
       ? "‼️ New Assignment Announcement"
-      : "📝 Assignment Reminder";
+      : type === "TODO"
+      ? "📝 Assignment Reminder"
+      : "⏰ All Assignments";
   for (const course of courses) {
     let text = "\n";
     if (course.assignments.length > 0) {
       text +=
         type === "NEW"
           ? `\n📚 ${course.name} has ${course.assignments.length} new assignments\n`
-          : `\n📚 ${course.name} has ${course.assignments.length} assignments wait for you\n`;
+          : type === "TODO"
+          ? `\n📚 ${course.name} has ${course.assignments.length} assignments wait for you\n`
+          : `\n📚 ${course.name} are\n`;
       for (const assignment of course.assignments) {
         text += assignment.name + "\n";
         text +=
-          "> ส่งวันที่ " +
+          "👉 ส่งวันที่ " +
           new Date(assignment.dueDate).toLocaleDateString("th-TH", {
             year: "numeric",
             month: "long",

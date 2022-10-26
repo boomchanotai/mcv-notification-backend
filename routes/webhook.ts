@@ -41,6 +41,11 @@ router.post("/", async (req: express.Request, res: express.Response) => {
           };
           await sendNewAssignmentNotification(sender, response, "TODO");
         }
+      } else if (text == "ALL") {
+        const data = await getUserInfo(user.studentId);
+        if (data) {
+          await sendNewAssignmentNotification(sender, data, "ALL");
+        }
       }
     }
   }
