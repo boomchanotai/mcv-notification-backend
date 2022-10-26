@@ -36,7 +36,13 @@ const getNewAssignmentEveryday = async (studentId: string) => {
           };
         }),
       };
-      await sendNewAssignmentNotification(user.lineUserId, response, "NEW");
+      let count = 0;
+      for (const course of response.enrolledCourses) {
+        count += course.assignments.length;
+      }
+      if (count > 0) {
+        await sendNewAssignmentNotification(user.lineUserId, response, "NEW");
+      }
     }
   }
 };
